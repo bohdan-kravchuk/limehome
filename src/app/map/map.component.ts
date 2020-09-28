@@ -16,7 +16,7 @@ export class MapComponent implements OnInit {
   private lat = '37.7397';
   private lng = '-121.4252';
   private zoom = 14;
-  private hotels: any;
+  public hotels: any;
   private platform: any;
   private map: any;
   private ui: any;
