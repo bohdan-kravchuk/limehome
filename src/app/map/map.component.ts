@@ -76,7 +76,7 @@ export class MapComponent implements OnInit {
           this.map.removeObjects(markers.filter(
             marker => !this.hotels.find(hotel => marker.data?.id === hotel.id)
           ));
-          const filteredHotels = this.markers.length
+          const filteredHotels = markers.length
             ? this.hotels.filter(hotel => (
               !markers.find(marker => marker.data.id === hotel.id)
             ))
