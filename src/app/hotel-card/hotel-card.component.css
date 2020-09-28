@@ -64,4 +64,5 @@
 .book-button:hover,
 .book-button:active {
   background-color:rgb(206, 129, 36);
+  outline: none;
 }

@@ -16,11 +16,13 @@ export class MapComponent implements OnInit {
   private lat = '37.7397';
   private lng = '-121.4252';
   private zoom = 14;
-  public hotels: any;
+  public hotels = [];
+  private markers = [];
   private platform: any;
   private map: any;
   private ui: any;
   private timer: ReturnType<typeof setTimeout>;
+  private activeMarker: any;
 
   constructor(private http: HttpClient) { }
 
@@ -45,7 +47,6 @@ export class MapComponent implements OnInit {
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
     this.map.addEventListener('dragend', this.handleDragEnd);
     this.map.addEventListener('dragstart', this.handleDragStart);
-    this.map.addEventListener('mapviewchange', () => console.log(this.map.ChangeEvent));
   }
 
   private handleDragEnd = () => {
@@ -70,23 +71,52 @@ export class MapComponent implements OnInit {
     this.getHotels()
       .subscribe(
         data => {
-          this.map.removeObjects(this.map.getObjects());
           this.hotels = data.results.items;
-          this.hotels.forEach(hotel => {
-            this.setMarker({ lat: hotel.position[0], lng: hotel.position[1] }, hotel)
-          });
+          const markers = this.map.getObjects();
+          this.map.removeObjects(markers.filter(
+            marker => !this.hotels.find(hotel => marker.data?.id === hotel.id)
+          ));
+          const filteredHotels = this.markers.length
+            ? this.hotels.filter(hotel => (
+              !markers.find(marker => marker.data.id === hotel.id)
+            ))
+            : this.hotels;
+          const newMarkers = filteredHotels.map(hotel => (
+            this.createMarker(this.createCoords(hotel), hotel)
+          ));
+          this.map.addObjects(newMarkers);
         },
         error => console.error('There was an error!', error)
       );
   }
 
-  private setMarker = (coords: any, data: any) => {
-    const icon = new H.map.Icon('../../assets/images/defaultHomeIcon.svg');
+  private createCoords = (place) => ({
+     lat: place.position[0], lng: place.position[1]
+  })
+
+  private createMarker = (coords, data, type = 'default') => {
+    const icon = type === 'default'
+      ? new H.map.Icon('../../assets/images/defaultHomeIcon.svg')
+      : new H.map.Icon('../../assets/images/activeHomeIcon.svg');
     const marker = new H.map.Marker(coords, { icon });
+
     marker.setData(data);
-    marker.addEventListener('tap', event => {
-      console.log('tap');
+    marker.addEventListener('tap', () => {
+      if (this.activeMarker) {
+        if (this.activeMarker.data.id === marker.data.id) return;
+        const newMarker = this.createMarker(this.createCoords(this.activeMarker.data), this.activeMarker.data);
+        this.replaceMarker(this.activeMarker, newMarker);
+      }
+      const newMarker = this.createMarker(coords, data, 'active');
+      this.replaceMarker(marker, newMarker);
+      this.activeMarker = newMarker;
     }, false);
-    this.map.addObject(marker);
+
+    return marker;
+  }
+
+  private replaceMarker = (marker, newMarker) => {
+    this.map.removeObject(marker);
+    this.map.addObject(newMarker);
   }
 }
