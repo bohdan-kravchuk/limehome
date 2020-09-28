@@ -11,8 +11,6 @@ export class HotelCardComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit(): void {
-    console.log(this.hotel);
-  }
+  ngOnInit(): void { }
 
 }

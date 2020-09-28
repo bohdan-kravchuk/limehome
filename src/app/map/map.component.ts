@@ -110,9 +110,15 @@ export class MapComponent implements OnInit {
       const newMarker = this.createMarker(coords, data, 'active');
       this.replaceMarker(marker, newMarker);
       this.activeMarker = newMarker;
+      this.scroll(data.id);
     }, false);
 
     return marker;
+  }
+
+  private scroll = (id) => {
+    const el = document.getElementById(id);
+    el.scrollIntoView({ behavior: 'smooth', inline: 'center' });
   }
 
   private replaceMarker = (marker, newMarker) => {

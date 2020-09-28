@@ -1,5 +1,9 @@
 <app-map #map></app-map>
 
 <div class="card-container" *ngIf="map.hotels.length">
-  <app-hotel-card *ngFor="let hotel of map.hotels" [hotel]="hotel"></app-hotel-card>
+  <app-hotel-card
+    *ngFor="let hotel of map.hotels"
+    [hotel]="hotel"
+  >
+  </app-hotel-card>
 </div>

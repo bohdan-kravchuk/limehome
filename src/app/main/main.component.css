@@ -1,7 +1,6 @@
 .card-container {
   position: absolute;
   bottom: 10px;
-  left: 10px;
   display: flex;
   background-color: transparent;
   max-width: calc(100vw - 10px);
