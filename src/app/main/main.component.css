@@ -3,7 +3,7 @@
   bottom: 10px;
   display: flex;
   background-color: transparent;
-  max-width: calc(100vw - 10px);
+  max-width: 100vw;
   overflow: overlay;
 }
 
