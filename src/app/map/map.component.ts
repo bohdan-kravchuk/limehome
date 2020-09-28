@@ -1,5 +1,6 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { IconType } from 'src/common/enums/IconTypes';
+import { ApiService } from '../api.service';
 
 declare const H: any;
 
@@ -12,19 +13,19 @@ export class MapComponent implements OnInit {
   @ViewChild('map')
   public mapElement: ElementRef;
 
+  public hotels = [];
   private apiKey = 'tlWeWjIWwqJYDLAHkVz5B9T5upp7LeHVewaI7Tv23OE';
   private lat = '37.7397';
   private lng = '-121.4252';
-  private zoom = 14;
-  public hotels = [];
-  private markers = [];
+  private radius = '12000';
+  private category = 'accommodation';
+  private lang = 'en-US';
+  private zoom = '14';
   private platform: any;
   private map: any;
-  private ui: any;
-  private timer: ReturnType<typeof setTimeout>;
   private activeMarker: any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private apiService: ApiService) { }
 
   ngOnInit() {
     this.platform = new H.service.Platform({
@@ -43,61 +44,52 @@ export class MapComponent implements OnInit {
         center: { lat: this.lat, lng: this.lng }
       }
     );
-    const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
-    this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
+    new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    H.ui.UI.createDefault(this.map, defaultLayers);
     this.map.addEventListener('dragend', this.handleDragEnd);
-    this.map.addEventListener('dragstart', this.handleDragStart);
   }
 
   private handleDragEnd = () => {
-    this.timer = setTimeout(() => {
-      const { lat, lng } = this.map.getCenter();
-      this.lat = lat;
-      this.lng = lng;
-      this.handleHotels();
-    }, 500);
-  }
-
-  private handleDragStart = () => {
-    clearTimeout(this.timer);
-  }
-
-  private getHotels = () => {
-    const headers = { 'Accept-Language': 'en' }
-    return this.http.get<any>(`https://places.ls.hereapi.com/places/v1/browse?apiKey=${this.apiKey}&in=${this.lat},${this.lng};r=12000&cat=accommodation&lang=en-US`, { headers });
+    const { lat, lng } = this.map.getCenter();
+    this.lat = lat;
+    this.lng = lng;
+    this.handleHotels();
   }
 
   private handleHotels = () => {
-    this.getHotels()
+    const url = `browse?apiKey=${this.apiKey}&in=${this.lat},${this.lng};r=${this.radius}&cat=${this.category}&lang=${this.lang}`;
+    this.apiService.getHotels(url, { 'Accept-Language': 'en' })
       .subscribe(
         data => {
           this.hotels = data.results.items;
           const markers = this.map.getObjects();
-          this.map.removeObjects(markers.filter(
-            marker => !this.hotels.find(hotel => marker.data?.id === hotel.id)
-          ));
-          const filteredHotels = markers.length
-            ? this.hotels.filter(hotel => (
-              !markers.find(marker => marker.data.id === hotel.id)
-            ))
-            : this.hotels;
-          const newMarkers = filteredHotels.map(hotel => (
-            this.createMarker(this.createCoords(hotel), hotel)
-          ));
-          this.map.addObjects(newMarkers);
+          this.removeFarMarkers(markers);
+          this.addNewMarkers(markers);
         },
         error => console.error('There was an error!', error)
       );
   }
 
-  private createCoords = (place) => ({
-     lat: place.position[0], lng: place.position[1]
-  })
+  private removeFarMarkers = (markers) => {
+    this.map.removeObjects(markers.filter(
+      marker => !this.hotels.find(hotel => marker.data?.id === hotel.id)
+    ));
+  }
 
-  private createMarker = (coords, data, type = 'default') => {
-    const icon = type === 'default'
-      ? new H.map.Icon('../../assets/images/defaultHomeIcon.svg')
-      : new H.map.Icon('../../assets/images/activeHomeIcon.svg');
+  private addNewMarkers = (markers) => {
+    const filteredHotels = markers.length
+      ? this.hotels.filter(hotel => (
+        !markers.find(marker => marker.data.id === hotel.id)
+      ))
+      : this.hotels;
+    const newMarkers = filteredHotels.map(hotel => (
+      this.createMarker(this.createCoords(hotel), hotel)
+    ));
+    this.map.addObjects(newMarkers);
+  }
+
+  private createMarker = (coords, data, type: IconType = IconType.Default) => {
+    const icon = this.createIcon(type);
     const marker = new H.map.Marker(coords, { icon });
 
     marker.setData(data);
@@ -107,7 +99,7 @@ export class MapComponent implements OnInit {
         const newMarker = this.createMarker(this.createCoords(this.activeMarker.data), this.activeMarker.data);
         this.replaceMarker(this.activeMarker, newMarker);
       }
-      const newMarker = this.createMarker(coords, data, 'active');
+      const newMarker = this.createMarker(coords, data, IconType.Active);
       this.replaceMarker(marker, newMarker);
       this.activeMarker = newMarker;
       this.scroll(data.id);
@@ -116,13 +108,23 @@ export class MapComponent implements OnInit {
     return marker;
   }
 
+  private replaceMarker = (marker, newMarker) => {
+    this.map.removeObject(marker);
+    this.map.addObject(newMarker);
+  }
+
   private scroll = (id) => {
     const el = document.getElementById(id);
     el.scrollIntoView({ behavior: 'smooth', inline: 'center' });
   }
 
-  private replaceMarker = (marker, newMarker) => {
-    this.map.removeObject(marker);
-    this.map.addObject(newMarker);
+  private createCoords = (place) => ({
+    lat: place.position[0], lng: place.position[1]
+  })
+
+  private createIcon = (type: IconType = IconType.Default) => {
+    return type === IconType.Default
+      ? new H.map.Icon('../../assets/images/defaultHomeIcon.svg')
+      : new H.map.Icon('../../assets/images/activeHomeIcon.svg');
   }
 }
