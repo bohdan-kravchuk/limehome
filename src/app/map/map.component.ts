@@ -51,18 +51,20 @@ export class MapComponent implements OnInit {
     new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
     H.ui.UI.createDefault(this.map, defaultLayers);
     this.map.addEventListener('dragend', this.handleDragEnd);
-    this.map.addEventListener('mapviewchangeend', () => {
-      const newZoom= this.map.getZoom();
-      if (newZoom !== this.zoom) {
-        this.zoom = newZoom;
-        this.handleDragEnd();
-      }
-    })
+    this.map.addEventListener('mapviewchangeend', this.handleMapViewChangeEnd);
   }
 
   private handleDragEnd = () => {
     this.boundingBox = this.map.getViewModel().getLookAtData().bounds.getBoundingBox();
     this.getHotelsList();
+  }
+
+  private handleMapViewChangeEnd = () => {
+    const newZoom= this.map.getZoom();
+    if (newZoom !== this.zoom) {
+      this.zoom = newZoom;
+      this.handleDragEnd();
+    }
   }
 
   private getHotelsList = () => {
@@ -106,19 +108,21 @@ export class MapComponent implements OnInit {
     const marker = new H.map.Marker(coords, { icon });
 
     marker.setData(data);
-    marker.addEventListener('tap', () => {
-      if (this.activeMarker) {
-        if (this.activeMarker.data.id === marker.data.id) return;
-        const newMarker = this.createMarker(this.createCoords(this.activeMarker.data), this.activeMarker.data);
-        this.replaceMarker(this.activeMarker, newMarker);
-      }
-      const newMarker = this.createMarker(coords, data, IconType.Active);
-      this.replaceMarker(marker, newMarker);
-      this.activeMarker = newMarker;
-      this.scroll(data.id);
-    }, false);
+    marker.addEventListener('tap', () => this.handleTap(coords, data, marker), false);
 
     return marker;
+  }
+
+  private handleTap = (coords, data, marker) => {
+    if (this.activeMarker) {
+      if (this.activeMarker.data.id === marker.data.id) return;
+      const newMarker = this.createMarker(this.createCoords(this.activeMarker.data), this.activeMarker.data);
+      this.replaceMarker(this.activeMarker, newMarker);
+    }
+    const newMarker = this.createMarker(coords, data, IconType.Active);
+    this.replaceMarker(marker, newMarker);
+    this.activeMarker = newMarker;
+    this.scroll(data.id);
   }
 
   private replaceMarker = (marker, newMarker) => {
