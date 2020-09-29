@@ -80,9 +80,13 @@ export class MapComponent implements OnInit {
   }
 
   private removeFarMarkers = (markers) => {
-    this.map.removeObjects(markers.filter(
-      marker => !this.hotels.find(hotel => marker.data?.id === hotel.id)
-    ));
+    const farMarkers = markers.filter(marker =>
+      !this.hotels.find(hotel => marker.data?.id === hotel.id)
+    );
+    if (this.activeMarker && farMarkers.find(marker => marker.data.id === this.activeMarker.data.id)) {
+      this.activeMarker = null;
+    }
+    this.map.removeObjects(farMarkers);
   }
 
   private addNewMarkers = (markers) => {
