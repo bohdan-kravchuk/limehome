@@ -110,7 +110,7 @@ export class MapComponent implements OnInit {
 
   private createMarker = (coords, data, type: IconType = IconType.Default) => {
     const icon = icons[type];
-    const marker = new H.map.Marker(coords, { icon });
+    const marker = new H.map.Marker(coords, { icon, zIndex: type === IconType.Active ? 0 : 1 });
 
     marker.setData(data);
     marker.addEventListener('tap', () => this.handleTap(coords, data, marker), false);
