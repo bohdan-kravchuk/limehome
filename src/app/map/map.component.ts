@@ -4,6 +4,11 @@ import { ApiService } from '../api.service';
 
 declare const H: any;
 
+const icons = {
+  [IconType.Default]: new H.map.Icon('../../assets/images/defaultHomeIcon.svg'),
+  [IconType.Active]: new H.map.Icon('../../assets/images/activeHomeIcon.svg')
+}
+
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
@@ -31,7 +36,7 @@ export class MapComponent implements OnInit {
     this.platform = new H.service.Platform({
       apikey: this.apiKey
     });
-    this.handleHotels();
+    this.getHotelsList();
   }
 
   ngAfterViewInit() {
@@ -53,12 +58,12 @@ export class MapComponent implements OnInit {
     const { lat, lng } = this.map.getCenter();
     this.lat = lat;
     this.lng = lng;
-    this.handleHotels();
+    this.getHotelsList();
   }
 
-  private handleHotels = () => {
+  private getHotelsList = () => {
     const url = `browse?apiKey=${this.apiKey}&in=${this.lat},${this.lng};r=${this.radius}&cat=${this.category}&lang=${this.lang}`;
-    this.apiService.getHotels(url, { 'Accept-Language': 'en' })
+    this.apiService.getHotels(url)
       .subscribe(
         data => {
           this.hotels = data.results.items;
@@ -89,7 +94,7 @@ export class MapComponent implements OnInit {
   }
 
   private createMarker = (coords, data, type: IconType = IconType.Default) => {
-    const icon = this.createIcon(type);
+    const icon = icons[type];
     const marker = new H.map.Marker(coords, { icon });
 
     marker.setData(data);
@@ -115,16 +120,10 @@ export class MapComponent implements OnInit {
 
   private scroll = (id) => {
     const el = document.getElementById(id);
-    el.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'center' });
   }
 
   private createCoords = (place) => ({
     lat: place.position[0], lng: place.position[1]
   })
-
-  private createIcon = (type: IconType = IconType.Default) => {
-    return type === IconType.Default
-      ? new H.map.Icon('../../assets/images/defaultHomeIcon.svg')
-      : new H.map.Icon('../../assets/images/activeHomeIcon.svg');
-  }
 }

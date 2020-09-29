@@ -9,5 +9,16 @@
 
 .card-container::-webkit-scrollbar {
   height: 0px;
+  width: 0px;
   background: transparent;
+}
+
+@media (max-height: 479px) {
+  .card-container {
+    flex-direction: column;
+    bottom: auto;
+    top: 56px;
+    right: 10px;
+    max-height: calc(100vh - 56px);
+  }
 }

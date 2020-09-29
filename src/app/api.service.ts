@@ -10,8 +10,9 @@ export class ApiService {
 
   constructor(private httpClient: HttpClient) { }
 
-  public getHotels(url: string, headers?: IHeaders) {
+  public getHotels(url: string) {
     const fullUrl = `${this.baseUrl}${url}`;
+    const headers: IHeaders = { 'Accept-Language': 'en' };
     return this.httpClient.get<any>(fullUrl, { headers });
   }
 }

@@ -6,10 +6,6 @@
   margin-left: 10px;
 }
 
-.hotel-card:last-of-type {
-  margin-right: 10px;
-}
-
 .content {
   display: flex;
   margin-bottom: 15px;
@@ -70,4 +66,11 @@
 .book-button:active {
   background-color:rgb(206, 129, 36);
   outline: none;
+}
+
+@media (max-height: 479px) {
+  .hotel-card {
+    margin-left: 0;
+    margin-top: 10px;
+  }
 }
