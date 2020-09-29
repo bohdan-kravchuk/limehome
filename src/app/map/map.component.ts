@@ -1,13 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { IconType } from 'src/common/enums/IconTypes';
 import { ApiService } from '../api.service';
-
-declare const H: any;
-
-const icons = {
-  [IconType.Default]: new H.map.Icon('../../assets/images/defaultHomeIcon.svg'),
-  [IconType.Active]: new H.map.Icon('../../assets/images/activeHomeIcon.svg')
-}
+import { icons } from 'src/common/icons';
 
 @Component({
   selector: 'app-map',
