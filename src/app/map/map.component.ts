@@ -52,6 +52,7 @@ export class MapComponent implements OnInit {
     H.ui.UI.createDefault(this.map, defaultLayers);
     this.map.addEventListener('dragend', this.handleDragEnd);
     this.map.addEventListener('mapviewchangeend', this.handleMapViewChangeEnd);
+    window.addEventListener('resize', this.handleResize);
   }
 
   private handleDragEnd = () => {
@@ -65,6 +66,10 @@ export class MapComponent implements OnInit {
       this.zoom = newZoom;
       this.handleDragEnd();
     }
+  }
+
+  private handleResize = () => {
+    this.map.getViewPort().resize();
   }
 
   private getHotelsList = () => {
