@@ -2,9 +2,8 @@
 
 <div class="card-container" *ngIf="map.hotels.length">
   <app-hotel-card
-    *ngFor="let hotel of map.hotels; let i = index"
+    *ngFor="let hotel of map.hotels"
     [hotel]="hotel"
-    [index]="i"
   >
   </app-hotel-card>
 </div>

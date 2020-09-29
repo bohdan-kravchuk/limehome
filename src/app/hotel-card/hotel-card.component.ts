@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { getRandomInt } from 'src/common/helpers/helpers';
 import { images } from 'src/common/mockData';
 
 @Component({
@@ -10,11 +11,8 @@ export class HotelCardComponent implements OnInit {
   @Input()
   hotel: any;
 
-  @Input()
-  index: number;
-
   hotelImages = images;
-  randomInd = Math.round(Math.random() * (this.hotelImages.length - 1))
+  randomInd = getRandomInt(0, this.hotelImages.length - 1);
 
   constructor() { }
 
